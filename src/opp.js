@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
-import axios from './axios';
+// import axios from './axios';
 import Private from './private';
 import { connect } from 'react-redux';
+import { closeChatWindow } from'./actions';
 
 class Opp extends Component {
     constructor(props) {
@@ -19,21 +20,23 @@ class Opp extends Component {
         }
         const chatWindowsDiv = (
             <div className="chatWindows">
-                {chatWindows.map(window => (
-                    <div key={window.id} className="window">
-                        <div className="bigName">
-                            { window.name }
+                {chatWindows.map(chatWindow => (
+                    <div key={chatWindow.id} className="chatWindow">
+                        <img className="pictureForChat" src={chatWindow.profile_pic || '/images/default.png'} />
+                        <div className="userName">
+                            { chatWindow.name }
                         </div>
-                        <img className="OppPicture" src={window.profile_pic || '/images/default.png'} />
-                        <Private otherUser={ window }/>
+                        <div onClick={() => this.props.dispatch(closeChatWindow(chatWindow))} className="closer">X</div>
+
+                        <Private otherUser={ chatWindow }/>
                     </div>
                 ))}
             </div>
         );
 
         return (
-            <div id="ChatsOrNot">
-                {!chatWindows.length && <div>No Chats yet. Time to start a Chat!</div>}
+            <div id="chatsOrNot">
+                {!chatWindows.length && <div>There is no unread messages. Time to start a Chat!</div>}
                 {!!chatWindows.length && chatWindowsDiv}
             </div>
         );

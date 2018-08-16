@@ -8,9 +8,6 @@ export default function(state = {}, action) {
         };
     }
 
-
-
-
     if (action.type == 'PUSH_ONLINE_USERS_TO_REDUX') {
         console.log("pushOnlineUsersToRedux", action.onlineUsers);
         state = {
@@ -19,19 +16,27 @@ export default function(state = {}, action) {
         };
     }
 
+    if (action.type == 'PUSH_OFFLINE_USERS_TO_REDUX') {
+        console.log("pushOfflineUsersToRedux", action.offlineUsers);
+        state = {
+            ...state,
+            offlineUsers: action.offlineUsers
+        };
+    }
+
     if (action.type == 'USER_JOINED') {
         state = {
             ...state,
-            onlineUsers: [...state.onlineUsers, action.user]
+            onlineUsers: [...state.onlineUsers, action.user],
+            offlineUsers: state.offlineUsers.filter(user => user.id != action.user.id)
         };
     }
 
     if (action.type == 'USER_LEFT') {
         state = {
             ...state,
-            onlineUsers: state.onlineUsers.filter(
-                user => user.id != action.user.id
-            )
+            onlineUsers: state.onlineUsers.filter(user => user.id != action.user.id),
+            offlineUsers: [...state.offlineUsers, action.user]
         };
     }
 
@@ -44,22 +49,21 @@ export default function(state = {}, action) {
     }
 
     if (action.type == 'OPEN_CHAT_WINDOW') {
-
-        state = {
-            ...state,
-            chatWindows: [...state.chatWindows, action.chatWindow]
-            //
-            // array.includes(chatWindow) || state.user.id == action.chatWindow.id
-            //     ? return
-            //     : chatWindows: [...state.chatWindows, action.chatWindow]
-        };
+        state.chatWindows.find(
+            chatWindow => chatWindow.id == action.chatWindow.id
+        ) || state.userInfo.id == action.chatWindow.id
+            ? state = {...state}
+            : state = {
+                ...state,
+                chatWindows: [...state.chatWindows, action.chatWindow]
+            };
     }
 
     if (action.type == 'CLOSE_CHAT_WINDOW') {
         state = {
             ...state,
             chatWindows: state.chatWindows.filter(
-                window => window.id != action.user.id
+                chatWindow => chatWindow.id != action.chatWindow.id
             )
         };
     }
@@ -97,7 +101,6 @@ export default function(state = {}, action) {
             privateMessages: [...state.privateMessages, action.privateMessage]
         };
     }
-
-
+    
     return state;
 }

@@ -5,6 +5,6 @@ CREATE TABLE private_messages (
     sender_id INTEGER NOT NULL,
     receiver_id INTEGER NOT NULL,
     message TEXT NOT NULL,
-    readed BOOLEAN NOT NULL DEFAULT FALSE,
+    read BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )

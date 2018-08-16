@@ -15,6 +15,7 @@ const path = require('path');
 const s3 = require('./s3');
 const config = require('./config');
 
+
 app.use(cookieParser());
 
 const cookieSessionMiddleware = cookieSession({
@@ -26,6 +27,7 @@ app.use(cookieSessionMiddleware);
 io.use(function(socket, next) {
     cookieSessionMiddleware(socket.request, socket.request.res, next);
 });
+
 app.use(csurf());
 
 app.use(function(req, res, next){
@@ -50,6 +52,12 @@ if (process.env.NODE_ENV != 'production') {
 } else {
     app.use('/bundle.js', (req, res) => res.sendFile(`${__dirname}/bundle.js`));
 }
+
+app.get('/logout', (req, res) => {
+    req.session.userId = null;
+    res.redirect("/welcome");
+});
+
 
 app.get('/user', function(req, res) {
     db.getYourUserInfo(req.session.userId).then(
@@ -170,20 +178,33 @@ io.on('connection', function(socket) {
     // console.log(`socket with the id ${socket.request.session.userId} is now connected`);
     onlineUsers[socket.id]= socket.request.session.userId;
     // console.log(onlineUsers);
-    db.getUsersByIds(Object.values(onlineUsers)).then(users => {
-        // console.log('users in dbquery for socket', users);
-        socket.emit("onlineUsers", users);
-    });
 
+    db.getUsersByIds(Object.values(onlineUsers))
+        .then(onlineUsers => {
+
+            // console.log('users in dbquery online for socket', onlineUsers);
+            socket.emit("onlineUsers", onlineUsers);
+        }).catch(err => {
+            console.log(err);
+        });
+    db.getUsersByNoIds(Object.values(onlineUsers))
+        .then(offlineUsers => {
+            // console.log('users in dbquery offline for socket', offlineUsers);
+            socket.emit("offlineUsers", offlineUsers);
+        }).catch(err => {
+            console.log(err);
+        });
+
+    db.getChatsToOpen(socket.request.session.userId).then(chatWindows => {
+        socket.emit("chatWindows", chatWindows);
+    });
     db.getChatMessages().then(chatMessages => {
         socket.emit("chatMessages", chatMessages.slice(-10));
     });
-    db.getPrivateMessages(socket.request.session.id).then(privateMessages => {
+    db.getPrivateMessages(socket.request.session.userId).then(privateMessages => {
         socket.emit('privateMessages', privateMessages);
     });
 
-
-    socket.emit('chatWindows', chatWindows)
 
     if (
         Object.values(onlineUsers).filter(id => id == socket.request.session.userId).length == 1
@@ -204,13 +225,20 @@ io.on('connection', function(socket) {
             Object.values(onlineUsers).filter(id => id == socket.request.session.userId).length == 1
         ) {
             db.getYourUserInfo(socket.request.session.userId).then(
-                data => {
-                    socket.broadcast.emit("userLeft", data);
+                userLeft => {
+                    socket.broadcast.emit("userLeft", userLeft);
                     // console.log("data get your user info ", data);
+                    db.updateRead(socket.request.session.userId).then(
+                        readMessages => {
+                            console.log("read messages", readMessages);
+                        }).catch(error => {
+                        console.log(error);
+                    })
 
                 }).catch(error => {
                 console.log(error);
-            });
+
+                });
 
         }
         delete onlineUsers[socket.id];
@@ -240,7 +268,7 @@ io.on('connection', function(socket) {
         console.log('newPrivateMessage Socket on', newPrivateMessage)
         db.addPrivateMessage(socket.request.session.userId, newPrivateMessage.receiverId, newPrivateMessage.content).then(
             dataPrivateMessage => {
-                db.getYourUserInfo(newPrivateMessage.receiverId).then(
+                db.getYourUserInfo(socket.request.session.userId).then(
                     dataChatWindow => {
                         let completePrivateMessage = {
                             privateMessage: dataPrivateMessage,

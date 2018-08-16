@@ -1,5 +1,5 @@
 import * as io from 'socket.io-client';
-import { pushOnlineUsersToRedux, userJoined, userLeft, pushChatMessagesToRedux, newMessageAction, pushOpenChatWindowsToRedux, pushPrivateMessagesToRedux, openChatWindow, newPrivateMessageAction } from './actions';
+import { pushOnlineUsersToRedux, pushOfflineUsersToRedux, userJoined, userLeft, pushChatMessagesToRedux, newMessageAction, pushOpenChatWindowsToRedux, pushPrivateMessagesToRedux, openChatWindow, newPrivateMessageAction } from './actions';
 
 let socket;
 
@@ -8,8 +8,12 @@ export function init(store) {
         socket = io.connect();
 
         socket.on('onlineUsers', users => {
-            console.log("users on onlineUser listen", users);
+            // console.log("users on onlineUser listen", users);
             store.dispatch(pushOnlineUsersToRedux(users));
+        });
+        socket.on('offlineUsers', users => {
+            // console.log("users on offlineUser listen", users);
+            store.dispatch(pushOfflineUsersToRedux(users));
         });
 
         socket.on('userJoined', user => {
@@ -28,21 +32,18 @@ export function init(store) {
         });
 
         socket.on('chatWindows', chatWindows => {
-            store.dispatch(pushOpenChatWindowsToRedux(chatWindows))
-        })
+            store.dispatch(pushOpenChatWindowsToRedux(chatWindows));
+        });
 
         socket.on('newPrivateMessageBack', newMessageAndChatWindow => {
             store.dispatch(newPrivateMessageAction(newMessageAndChatWindow.privateMessage));
-            store.dispatch(openChatWindow(newMessageAndChatWindow.chatWindow))
+            store.dispatch(openChatWindow(newMessageAndChatWindow.chatWindow));
         });
 
         socket.on('newMessageBack', newMessage => {
             store.dispatch(newMessageAction(newMessage));
         });
     }
-// socket.emit('newMessage', newMessage => {
-//     store.dispatch(newMessage(newMessage));
-// });
 }
 
 export function newMessageSocket(newMessageSocket) {
@@ -52,13 +53,3 @@ export function newMessageSocket(newMessageSocket) {
 export function newPrivateMessage(newPrivateMessage) {
     socket.emit('newPrivateMessage', newPrivateMessage);
 }
-
-
-
-
-// socket.on('welcome', function(data) {
-//     console.log(data);
-//     socket.emit('thanks', {
-//         message: 'Thank you. It is great to be here.'
-//     });
-// });

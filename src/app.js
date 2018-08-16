@@ -1,11 +1,12 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import axios from './axios';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import Chat from './chat';
 import Online from './online';
-import Opp from './opp'
+import Opp from './opp';
 import NavLogin from './navLogin';
+import Footer from './footer';
 import { pushUserInformationToRedux } from './actions';
 
 class App extends React.Component {
@@ -51,10 +52,13 @@ class App extends React.Component {
                 <BrowserRouter>
                     <div>
                         <NavLogin />
+                        <div className="app">
+                            <Chat />
+                            <Online />
+                            <Opp />
+                        </div>
+                        <Footer />
 
-                        <Online />
-                        <Chat />
-                        <Opp />
 
                     </div>
                 </BrowserRouter>

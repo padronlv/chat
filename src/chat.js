@@ -28,7 +28,7 @@ class Chat extends React.Component {
         // !this.friendsWannabes && this.props.dispatch(receiveFriendsWannabes());
     }
     render() {
-        const { chatMessages } = this.props;
+        const { chatMessages, userInfo } = this.props;
         // console.log("this.props", this.props);
         // console.log("friends", friends)
         if (!chatMessages) {
@@ -40,11 +40,15 @@ class Chat extends React.Component {
 
                 <div className="chatMessages">
                     {chatMessages.map(message => (
-                        <div key={message.created_at} className="message">
+                        <div key={message.created_at} className={
+                            userInfo.id == message.user_id
+                                ? "messageMe"
+                                : "messageOther"
+                        }>
                             <img className="pictureForChat" src={message.profilePic || '/images/default.png'} />
-                            <div className="commentRight">
-                                <div className='firstName'>Created at {message.created_at} by {message.name}</div>
-                                <div className='content'>{message.message}</div>
+                            <div className="messageText">
+                                <div className='messageName'>Created at {message.created_at} by {message.name}</div>
+                                <div className='messageText'>{message.message}</div>
                             </div>
                         </div>
                     ))}
@@ -54,13 +58,13 @@ class Chat extends React.Component {
 
         return (
             <div id="MessagesOrNot">
-                <h1>Chat</h1>
+                <h1>Spiced Chat</h1>
                 {!chatMessages.length && <div>Chat is empty, start a new conversation!</div>}
                 {!!chatMessages.length && chatDiv}
 
                 <form onSubmit={ this.handleSubmitTextarea } className="">
                     <textarea className="textAreaChat" name="chatMessage" onChange={ this.handleChangeTextarea }></textarea>
-                    <button className="submitButton" type="submit">Send Message</button>
+                    <button className="submitButton" type="submit">Send</button>
                 </form>
             </div>
         );
@@ -68,6 +72,7 @@ class Chat extends React.Component {
 }
 export default connect(state => {
     return {
+        userInfo: state.userInfo,
         chatMessages: state.chatMessages
     };
 })(Chat);

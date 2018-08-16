@@ -1,37 +1,20 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
 
-function NavLogout(props) {
+function NavLogin(props) {
     return (
         <nav className="nav">
             <ul>
                 <li><img className="smallLogo" src="/images/logo.png" /></li>
             </ul>
             <ul>
-                <li><Link to="/">
+                <li>
                     <img id="smallProfilePic"
-                        src={ props.image }
-                        alt={ `${props.first} ${props.last}` }
+                        src= {props.userInfo.profile_pic}
+                        alt={ `${props.name}` }
                     />
-                </Link></li>
-                <li><Link to="/chat">
-                    <img className="icon"
-                        src="/images/chat.png"
-                        alt='chat'
-                    />
-                </Link></li>
-                <li><Link to="/online">
-                    <img className="icon"
-                        src="/images/online.png"
-                        alt='online'
-                    />
-                </Link></li>
-                <li><Link to="/friends">
-                    <img className="icon"
-                        src="/images/friendship.png"
-                        alt='friends'
-                    />
-                </Link></li>
+                </li>
 
                 <li><a href="/logout">
                     <img className="icon"
@@ -45,4 +28,8 @@ function NavLogout(props) {
     );
 }
 
-export default NavLogout;
+export default connect(state => {
+    return {
+        userInfo: state.userInfo
+    };
+})(NavLogin);

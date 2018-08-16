@@ -98,7 +98,15 @@ module.exports.getUsersByIds = function(arrayOfIds) {
     const query = `SELECT * FROM users WHERE id = ANY($1)`;
     return db.query(query, [arrayOfIds])
         .then(results => {
-            console.log(results.rows);
+            // console.log(results.rows);
+            return results.rows;
+        });
+};
+module.exports.getUsersByNoIds = function(arrayOfIds) {
+    const query = `SELECT * FROM users WHERE id != ALL($1)`;
+    return db.query(query, [arrayOfIds])
+        .then(results => {
+            // console.log(results.rows);
             return results.rows;
         });
 };
@@ -109,7 +117,7 @@ module.exports.getChatMessages = function () {
     FROM public_messages
     JOIN users
     ON users.id = public_messages.user_id
-    ORDER BY public_messages.id DESC LIMIT 10;`)
+    ORDER BY public_messages.id;`)
         .then(results => {
             // console.log(results.rows);
             return(results.rows);
@@ -139,12 +147,12 @@ module.exports.getPrivateMessages = function (userId) {
     const q = `
     SELECT * FROM private_messages
     WHERE sender_id = $1 OR receiver_id = $1
-    ORDER BY id DESC
+    ORDER BY id
     `;
     const params = [userId];
     return db.query(q, params)
         .then(results => {
-            // console.log(results.rows);
+            // console.log('result from getPrivateMessages', results.rows);
             return(results.rows);
         }).catch(err => {
             console.log(err);
@@ -165,5 +173,40 @@ module.exports.addPrivateMessage = function (senderId, receiverId, message) {
         .catch(err => {
             // console.log("this is workinggggggggggggggggg");
             return Promise.reject(err);
+        });
+};
+
+module.exports.updateRead = function (userId) {
+    const q = `
+        UPDATE private_messages
+        SET read = TRUE
+        WHERE receiver_id = $1
+        RETURNING *
+    `;
+    const params = [userId || null];
+    return db.query(q, params)
+        .then(results => {
+            return results.rows[0];
+        })
+        .catch(err => {
+            // console.log("this is workinggggggggggggggggg");
+            return Promise.reject(err);
+        });
+};
+
+module.exports.getChatsToOpen = function (receiverId) {
+    const q = `
+    SELECT * FROM users WHERE id in (
+        SELECT sender_id FROM private_messages
+        WHERE receiver_id = $1 and read = FALSE
+    )
+    `;
+    const params = [receiverId];
+    return db.query(q, params)
+        .then(results => {
+            // console.log('result from getPrivateMessages', results.rows);
+            return(results.rows);
+        }).catch(err => {
+            console.log(err);
         });
 };
