@@ -36,7 +36,7 @@ class Opp extends Component {
 
         return (
             <div id="chatsOrNot">
-                {!chatWindows.length && <div>There is no unread messages. Time to start a Chat!</div>}
+                {!chatWindows.length && <div className="titleChats">No open chats</div>}
                 {!!chatWindows.length && chatWindowsDiv}
             </div>
         );

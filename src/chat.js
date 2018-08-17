@@ -22,10 +22,11 @@ class Chat extends React.Component {
         e.preventDefault();
         // console.log("Running handleSubmit", this.state);
         newMessageSocket(this.state.chatMessage);
+        document.querySelector('.textAreaChat').value = '';
     }
 
-    componentDidMount() {
-        // !this.friendsWannabes && this.props.dispatch(receiveFriendsWannabes());
+    componentDidUpdate() {
+        this.elem.scrollTop = this.elem.scrollHeight - this.elem.clientHeight;
     }
     render() {
         const { chatMessages, userInfo } = this.props;
@@ -36,31 +37,27 @@ class Chat extends React.Component {
         }
 
         const chatDiv = (
-            <div>
 
-                <div className="chatMessages">
-                    {chatMessages.map(message => (
-                        <div key={message.created_at} className={
-                            userInfo.id == message.user_id
-                                ? "messageMe"
-                                : "messageOther"
-                        }>
-                            <img className="pictureForChat" src={message.profilePic || '/images/default.png'} />
-                            <div className="messageText">
-                                <div className='messageName'>Created at {message.created_at} by {message.name}</div>
-                                <div className='messageText'>{message.message}</div>
-                            </div>
+            <div className="chatMessages" ref={elem => (this.elem = elem)}>
+                {chatMessages.map(message => (
+                    <div key={message.created_at} className={
+                        userInfo.id == message.user_id
+                            ? "messageMe"
+                            : "messageOther"
+                    }>
+                        <img className="pictureForChat" src={message.profilePic || '/images/default.png'} />
+                        <div className="messageText">
+                            <div className='messageName'>{message.name}</div>
+                            <div className='messageText'>{message.message}</div>
                         </div>
-                    ))}
-                </div>
+                    </div>
+                ))}
             </div>
         );
 
         return (
             <div id="MessagesOrNot">
-                <h1>Spiced Chat</h1>
-                {!chatMessages.length && <div>Chat is empty, start a new conversation!</div>}
-                {!!chatMessages.length && chatDiv}
+                {chatDiv}
 
                 <form onSubmit={ this.handleSubmitTextarea } className="">
                     <textarea className="textAreaChat" name="chatMessage" onChange={ this.handleChangeTextarea }></textarea>

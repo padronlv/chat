@@ -32,8 +32,8 @@ class Private extends Component {
         newPrivateMessage(this.state.newPrivateMessage);
     }
 
-    componentDidMount() {
-
+    componentDidUpdate() {
+        this.elem.scrollTop = this.elem.scrollHeight - this.elem.clientHeight;
     }
 
     render() {
@@ -45,7 +45,7 @@ class Private extends Component {
             return (<div>Loading...</div>);
         }
         const privateMessagesDiv = (
-            <div className="privateMessages">
+            <div className="privateMessages" ref={elem => (this.elem = elem)}>
                 {filteredPM.map(privateMessage => (
                     <div key={privateMessage.created_at}  className={
                         userInfo.id == privateMessage.sender_id
@@ -60,8 +60,7 @@ class Private extends Component {
 
         return (
             <div className="privateMessagesOrNot">
-                {!privateMessages.length && <div>No messages yet. Time to start a conversation!</div>}
-                {!!privateMessages.length && privateMessagesDiv}
+                {privateMessagesDiv}
 
                 <form onSubmit={ this.handleSubmitTextarea } className="">
                     <textarea className="textAreaPrivate" name="comment" onChange={ this.handleChangeTextarea }></textarea>
