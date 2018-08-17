@@ -165,13 +165,12 @@ function requireUser(req, res, next) {
         next();
     }
 }
-server.listen(8080, function() {
+server.listen(process.env.PORT || 8080, function() {
     console.log("I'm listening.");
 });
 
 let onlineUsers = {};
 
-let chatWindows = [];
 
 io.on('connection', function(socket) {
     // console.log(`socket with the id ${socket.id} is now connected`);
