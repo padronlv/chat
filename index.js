@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
-const io = require('socket.io')(server, { origins: 'localhost:8080' });
+const io = require('socket.io')(server, { origins: 'localhost:8080 chat-victorpl.herokuapp.com:*'  });
 const compression = require('compression');
 const db = require('./db/db');
 const cookieParser = require('cookie-parser');
