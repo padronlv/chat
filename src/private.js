@@ -27,12 +27,15 @@ class Private extends Component {
 
     handleSubmitTextarea(e) {
         e.preventDefault();
-
-        console.log("Running handleSubmit", this.state.newPrivateMessage);
+        // console.log("Running handleSubmit", this.state.newPrivateMessage);
         newPrivateMessage(this.state.newPrivateMessage);
+        document.querySelector('.textAreaPrivate').value = '';
     }
 
     componentDidUpdate() {
+        this.elem.scrollTop = this.elem.scrollHeight - this.elem.clientHeight;
+    }
+    componentDidMount() {
         this.elem.scrollTop = this.elem.scrollHeight - this.elem.clientHeight;
     }
 
